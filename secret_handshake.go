@@ -14,24 +14,20 @@ var secretHandshakes = []struct {
 	{10, "double blink"},
 	{1, "wink"},
 }
+var reverseCode = 10000
 
 func Handshake(code uint) []string {
-	codeInBinaryStr := strconv.FormatInt(int64(code), 2)
-	codeInBinary, err := strconv.Atoi(codeInBinaryStr)
-	var binaryElements []int
+	codeInBinary, err := ToBinary(code)
 	if err == nil {
-		binaryElements = GetBinaryElements(codeInBinary)
+		binaryElements := GetBinaryElements(codeInBinary)
 		return ConvertToEvents(binaryElements)
 	}
 	return nil
 }
-func IsPositiveBinary(number int) bool {
-	s := strconv.Itoa(number)
-	i, err := strconv.ParseInt(s, 2, 64)
-	if err != nil || i < 0 {
-		return false
-	}
-	return true
+func ToBinary(number uint) (int, error) {
+	binaryStr := strconv.FormatInt(int64(number), 2)
+	binary, err := strconv.Atoi(binaryStr)
+	return binary, err
 }
 func GetBinaryElements(binary int) []int {
 	var elements []int
@@ -48,19 +44,27 @@ func GetBinaryElements(binary int) []int {
 	}
 	return elements
 }
+func IsPositiveBinary(number int) bool {
+	s := strconv.Itoa(number)
+	i, err := strconv.ParseInt(s, 2, 64)
+	if err != nil || i < 0 {
+		return false
+	}
+	return true
+}
 func ConvertToEvents(binaries []int) []string {
 	var events []string
-	isReverse := 1
+	isReverse := true
 	for i := 0; i < len(binaries); i++ {
 		for _, secretHandshake := range secretHandshakes {
-			if binaries[i] != 10000 && secretHandshake.code == binaries[i] {
+			if binaries[i] != reverseCode && secretHandshake.code == binaries[i] {
 				events = append(events, secretHandshake.event)
-			} else if binaries[i] == 10000 {
-				isReverse = 0
+			} else if binaries[i] == reverseCode {
+				isReverse = false
 			}
 		}
 	}
-	if isReverse == 1 {
+	if isReverse {
 		return Reverse(events)
 	} else {
 		return events
